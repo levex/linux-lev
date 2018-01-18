@@ -611,11 +611,21 @@ madvise_behavior_valid(int behavior)
 #endif
 	case MADV_DONTDUMP:
 	case MADV_DODUMP:
+    case MADV_RESERVEPAGE
 		return true;
 
 	default:
 		return false;
 	}
+}
+
+void
+madvise_reserve_page(unsigned long start_phys, unsigned long length)
+{
+    unsigned long end_phys = start_phys + length;
+
+    printk(KERN_EMERG "%s: reserving [0x%x - 0x%x], length: %d (%d pages)\n",
+            __func__, start_phys, end_phys, length, length << PAGE_SHIFT);
 }
 
 /*
@@ -706,6 +716,11 @@ SYSCALL_DEFINE3(madvise, unsigned long, start, size_t, len_in, int, behavior)
 	error = 0;
 	if (end == start)
 		return error;
+
+    if (behavior == MADV_RESERVEPAGE) {
+        madvise_reserve_page(start, len);
+        return 0;
+    }
 
 	write = madvise_need_mmap_write(behavior);
 	if (write) {

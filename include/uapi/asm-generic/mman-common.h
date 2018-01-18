@@ -58,6 +58,8 @@
 					   overrides the coredump filter bits */
 #define MADV_DODUMP	17		/* Clear the MADV_DONTDUMP flag */
 
+#define MADV_RESERVEPAGE 66 /* Remove a physical address from the buddy allocator */
+
 /* compatibility flags */
 #define MAP_FILE	0
 
