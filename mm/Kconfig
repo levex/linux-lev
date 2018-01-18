@@ -408,6 +408,14 @@ config NOMMU_INITIAL_TRIM_EXCESS
 
 	  See Documentation/nommu-mmap.txt for more information.
 
+config NOMMU_MAP_FIXED
+	depends on !MMU
+	bool "Enable experimental support for MAP_FIXED mappings"
+    help
+      (VERY) Experimental support for MAP_FIXED in NOMMU situations.
+
+      You'd better know what you are doing, otherwise select "N".
+
 config TRANSPARENT_HUGEPAGE
 	bool "Transparent Hugepage Support"
 	depends on HAVE_ARCH_TRANSPARENT_HUGEPAGE

@@ -892,9 +892,11 @@ static int validate_mmap_request(struct file *file,
 	unsigned long capabilities, rlen;
 	int ret;
 
+#ifndef CONFIG_NOMMU_MAP_FIXED
 	/* do the simple checks first */
 	if (flags & MAP_FIXED)
 		return -EINVAL;
+#endif
 
 	if ((flags & MAP_TYPE) != MAP_PRIVATE &&
 	    (flags & MAP_TYPE) != MAP_SHARED)
@@ -1222,8 +1224,15 @@ unsigned long do_mmap(struct file *file,
 	if (ret < 0)
 		return ret;
 
-	/* we ignore the address hint */
+#ifdef CONFIG_NOMMU_MAP_FIXED
+	/* we ignore the address hint, if !MAP_FIXED */
+	if (flags & MAP_FIXED == 0)
+		addr = 0;
+#else
+	/* address hint is ignored */
 	addr = 0;
+#endif /* CONFIG_NOMMU_MAP_FIXED */
+
 	len = PAGE_ALIGN(len);
 
 	/* we've determined that we can make the mapping, now translate what we
@@ -1355,6 +1364,12 @@ unsigned long do_mmap(struct file *file,
 	}
 
 	vma->vm_region = region;
+
+#ifdef CONFIG_NOMMU_MAP_FIXED
+	/* set the VMA's preferred start address if we are trying a fixed map */
+	if (flags & MAP_FIXED)
+		vma->vm_start = addr;
+#endif /* CONFIG_NOMMU_MAP_FIXED */
 
 	/* set up the mapping
 	 * - the region is filled in if NOMMU_MAP_DIRECT is still set
